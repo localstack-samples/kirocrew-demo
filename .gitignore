@@ -1,0 +1,12 @@
+.terraform/
+*.tfstate
+*.tfstate.*
+infra/lambda/handler.zip
+crew-app/ui/node_modules/
+# Keep the tiny compiled app panel in source so KiroCrew Desktop can install
+# this tutorial without asking readers to install Node.js or npm.
+__pycache__/
+.DS_Store
+# Working notes that are not part of the published tutorial.
+PLAN.md
+subagent-experiment/

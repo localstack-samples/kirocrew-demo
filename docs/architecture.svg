@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 440" width="960" height="440" role="img" aria-labelledby="title desc">
+  <title id="title">LocalStack Ops architecture</title>
+  <desc id="desc">A KiroCrew Desktop schedule runs the LocalStack Ops agent every 15 minutes. The agent deploys and smoke-tests an S3 to Lambda to DynamoDB flow in LocalStack using lstk, inspects LocalStack through the @localstack MCP server, and records each result in the LocalStack Ops dashboard.</desc>
+  <style>
+    :root { --bg: #ffffff; --group: #f6f8fa; --group-stroke: #d0d7de; --node: #ffffff; --node-stroke: #57606a; --text: #1f2328; --muted: #59636e; --accent: #6f42c1; --edge: #424a53; }
+    @media (prefers-color-scheme: dark) {
+      :root { --bg: #0d1117; --group: #161b22; --group-stroke: #3d444d; --node: #0d1117; --node-stroke: #9198a1; --text: #e6edf3; --muted: #9198a1; --accent: #b083f0; --edge: #c9d1d9; }
+    }
+    .bg { fill: var(--bg); }
+    .group { fill: var(--group); stroke: var(--group-stroke); stroke-width: 1.5; }
+    .node { fill: var(--node); stroke: var(--node-stroke); stroke-width: 1.5; }
+    .agent { stroke: var(--accent); stroke-width: 2.5; }
+    .group-title { font: 600 15px system-ui, -apple-system, "Segoe UI", sans-serif; fill: var(--muted); }
+    .name { font: 600 15px system-ui, -apple-system, "Segoe UI", sans-serif; fill: var(--text); text-anchor: middle; }
+    .sub { font: 12.5px ui-monospace, SFMono-Regular, Menlo, monospace; fill: var(--muted); text-anchor: middle; }
+    .label { font: 13px system-ui, -apple-system, "Segoe UI", sans-serif; fill: var(--text); }
+    .code { font: 12.5px ui-monospace, SFMono-Regular, Menlo, monospace; fill: var(--muted); }
+    .edge { stroke: var(--edge); stroke-width: 1.75; fill: none; marker-end: url(#arrow); }
+    .mcp { stroke: var(--accent); stroke-dasharray: 6 5; marker-end: url(#arrow-accent); }
+    .arrowhead { fill: var(--edge); }
+    .arrowhead-accent { fill: var(--accent); }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path class="arrowhead" d="M0,0 L10,5 L0,10 z"/>
+    </marker>
+    <marker id="arrow-accent" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path class="arrowhead-accent" d="M0,0 L10,5 L0,10 z"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" width="960" height="440"/>
+
+  <!-- KiroCrew Desktop -->
+  <rect class="group" x="16" y="16" width="928" height="150" rx="12"/>
+  <text class="group-title" x="36" y="44">KiroCrew Desktop</text>
+
+  <rect class="node" x="48" y="70" width="210" height="64" rx="8"/>
+  <text class="name" x="153" y="97">Schedule</text>
+  <text class="sub" x="153" y="118">localstack-ops-check</text>
+
+  <rect class="node agent" x="375" y="70" width="210" height="64" rx="8"/>
+  <text class="name" x="480" y="97">LocalStack Ops agent</text>
+  <text class="sub" x="480" y="118">localstack-ops-agent</text>
+
+  <rect class="node" x="702" y="70" width="210" height="64" rx="8"/>
+  <text class="name" x="807" y="97">LocalStack Ops</text>
+  <text class="sub" x="807" y="118">dashboard</text>
+
+  <path class="edge" d="M258,102 H373"/>
+  <text class="label" x="316" y="94" text-anchor="middle">every 15 min</text>
+
+  <path class="edge" d="M585,102 H700"/>
+  <text class="code" x="643" y="94" text-anchor="middle">record_run.py</text>
+  <text class="label" x="643" y="122" text-anchor="middle">pass / fail</text>
+
+  <!-- Agent to LocalStack -->
+  <path class="edge" d="M450,134 V272"/>
+  <text class="code" x="438" y="196" text-anchor="end">deploy-and-smoke.sh</text>
+  <text class="label" x="438" y="216" text-anchor="end">lstk terraform + lstk aws</text>
+
+  <path class="edge mcp" d="M510,134 V272"/>
+  <text class="code" x="522" y="196">@localstack MCP</text>
+  <text class="label" x="522" y="216">status, logs, IAM diagnosis</text>
+
+  <!-- LocalStack -->
+  <rect class="group" x="16" y="274" width="928" height="150" rx="12"/>
+  <text class="group-title" x="36" y="302">LocalStack · Docker on your computer</text>
+
+  <rect class="node" x="48" y="328" width="210" height="64" rx="8"/>
+  <text class="name" x="153" y="355">S3 bucket</text>
+  <text class="sub" x="153" y="376">localstack-ops-input</text>
+
+  <rect class="node" x="375" y="328" width="210" height="64" rx="8"/>
+  <text class="name" x="480" y="355">Lambda</text>
+  <text class="sub" x="480" y="376">localstack-ops-processor</text>
+
+  <rect class="node" x="702" y="328" width="210" height="64" rx="8"/>
+  <text class="name" x="807" y="355">DynamoDB table</text>
+  <text class="sub" x="807" y="376">localstack-ops-runs</text>
+
+  <path class="edge" d="M258,360 H373"/>
+  <text class="code" x="316" y="352" text-anchor="middle">health/*.json</text>
+
+  <path class="edge" d="M585,360 H700"/>
+  <text class="code" x="643" y="352" text-anchor="middle">PutItem</text>
+</svg>

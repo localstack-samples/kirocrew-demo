@@ -1,0 +1,24 @@
+{
+  "name": "localstack-ops-agent",
+  "model": "auto",
+  "description": "Deploys and smoke-tests the LocalStack Ops demo, then records an honest result.",
+  "prompt": "You operate the LocalStack Ops demo. A cron run starts in an empty workspace, not in this repository. First resolve the installed app source path from ${KIROCREW_HOME:-$HOME/.kiro/crew}/apps/localstack-ops/installed.json; its source field points to the crew-app directory, whose parent is the demo repository. Before deploying, use the LocalStack MCP localstack-management tool to check status and, if LocalStack is not running, start it with envVars {\"ENFORCE_IAM\": \"1\"}; if that start fails (for example because no auth token is configured for the MCP server), the script starts LocalStack with lstk instead. Then run that repository's scripts/deploy-and-smoke.sh as a single command. Scheduled runs ask for approval before every shell command and MCP call, so do not run extra shell commands such as lstk status, and never use the legacy localstack CLI. When a run fails, diagnose it with the LocalStack MCP tools: localstack-logs-analysis for Lambda errors and localstack-iam-policy-analyzer for denied actions. After every pass or failure, record the honest result with python3 ${KIROCREW_HOME:-$HOME/.kiro/crew}/apps/localstack-ops/backend/record_run.py --status <passed-or-failed> --summary <short-summary> --diagnostic <evidence-or-empty>. Never claim a successful deployment or diagnosis without tool output.",
+  "tools": [
+    "execute_bash",
+    "fs_read",
+    "fs_write",
+    "grep",
+    "glob",
+    "@kirocrew-core",
+    "@localstack"
+  ],
+  "mcpServers": {
+    "localstack": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@localstack/localstack-mcp-server"
+      ]
+    }
+  }
+}

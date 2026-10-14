@@ -1,0 +1,47 @@
+{
+  "name": "localstack-ops",
+  "version": "0.1.9",
+  "displayName": "LocalStack Ops",
+  "description": "A scheduled LocalStack deployment and smoke-test journal.",
+  "author": "Brian Rinaldi",
+  "agents": [
+    "agents/localstack-ops-agent.json"
+  ],
+  "skills": [
+    "skills/deploy-and-test"
+  ],
+  "backend": {
+    "entryPoint": "backend/server.py",
+    "port": "auto",
+    "healthCheck": "/health"
+  },
+  "ui": {
+    "entry": "dist/index.mjs",
+    "pages": [
+      {
+        "route": "/apps/localstack-ops",
+        "label": "LocalStack Ops",
+        "icon": "Activity"
+      }
+    ]
+  },
+  "crons": [
+    {
+      "name": "localstack-ops-check",
+      "cron_expr": "*/15 * * * *",
+      "message": "Run the LocalStack Ops deploy-and-smoke workflow. The cron workspace is empty: resolve this app's source field from ${KIROCREW_HOME:-$HOME/.kiro/crew}/apps/localstack-ops/installed.json, use that crew-app directory's parent as the demo repository, then run scripts/deploy-and-smoke.sh. Record the honest result in LocalStack Ops.",
+      "agent": "localstack-ops-agent",
+      "enabled": false
+    }
+  ],
+  "permissions": {
+    "api": [
+      "/apps/localstack-ops/api"
+    ],
+    "events": [
+      "notification"
+    ],
+    "storage": true,
+    "cron": true
+  }
+}
