@@ -90,7 +90,7 @@ The job is installed with its 15-minute schedule switched off, so it only runs w
 
 ## What to try next: catch an IAM bug locally
 
-LocalStack only evaluates IAM policies when it's started with `ENFORCE_IAM=1`. The agent passes `ENFORCE_IAM=1` when it starts LocalStack through the Power, and `scripts/deploy.sh` sets `LOCALSTACK_ENFORCE_IAM=1` when it has to start the emulator itself, so the Lambda's role behaves as it would on AWS. That setting only applies at startup: if LocalStack was already running before your first run, run `lstk stop` once and trigger the job again so the emulator restarts with enforcement.
+LocalStack only evaluates IAM policies when it's started with `ENFORCE_IAM=1`. The agent passes `ENFORCE_IAM=1` when it starts LocalStack through the Power, and `scripts/deploy.sh` sets `LOCALSTACK_ENFORCE_IAM=1` when it has to start the emulator itself, so the Lambda's role behaves as it would on AWS. That setting only applies at startup, so if LocalStack is already running without it—for example, started by another project—`scripts/deploy.sh` restarts it with enforcement. The restart resets everything in that LocalStack instance, including other projects' resources; a LocalStack that already enforces IAM is left alone.
 
 After recording one passing run:
 
@@ -133,7 +133,8 @@ A scheduled run fails quietly: the Schedule view can show a run as in progress, 
 - **The run summary says LocalStack was started with `lstk` rather than the Power:** the Power's start needs a `LOCALSTACK_AUTH_TOKEN`, and the app's agent runs its own LocalStack MCP server without one. That's expected; the agent still uses the Power to inspect LocalStack and diagnose failures.
 - **The dashboard shows `Could not load run history`:** make sure LocalStack Ops is enabled and trusted, then reopen the page. KiroCrew only starts a third-party app's backend once the app is trusted.
 - **The smoke test fails with `bad CPU type in executable`:** your AWS CLI is an Intel build on an Apple silicon Mac without Rosetta (a macOS update can remove it). Install the native arm64 AWS CLI v2 (for example, `brew install awscli`) or reinstall Rosetta with `softwareupdate --install-rosetta --agree-to-license`, then retry.
-- **Removing `dynamodb:PutItem` doesn't make the run fail:** LocalStack was started without IAM enforcement. Run `lstk stop`, then trigger the job again.
+- **Other LocalStack work disappeared after a run:** LocalStack was running without IAM enforcement, so `scripts/deploy.sh` restarted it with `ENFORCE_IAM=1`, which resets its state. To avoid this, start LocalStack with enforcement for all your work (for example, set `ENFORCE_IAM = "1"` in an env profile in your `lstk` config).
+- **A run fails with `LocalStack restarted but IAM enforcement is still off`:** the restart didn't pick up the setting. Check that nothing else starts LocalStack at the same moment, run `lstk stop`, and trigger the job again.
 - **You see warnings about stored defaults or a retired STT provider:** those are unrelated KiroCrew configuration-migration notices. Review them separately in Settings; they do not indicate a LocalStack failure.
 
 ## For contributors
