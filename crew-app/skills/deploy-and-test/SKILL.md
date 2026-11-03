@@ -24,7 +24,8 @@ shell commands such as `lstk status`, and never use the legacy `localstack` CLI.
 3. Make sure LocalStack is running with the LocalStack MCP `localstack-management` tool:
    - Call it with `action: "status"`.
    - If LocalStack is not running, call it with `action: "start"` and `envVars: {"ENFORCE_IAM": "1"}` so the Lambda role's IAM policy is enforced.
-   - If the tool is unavailable or the start fails (for example, `Auth Token Required` when the MCP server has no `LOCALSTACK_AUTH_TOKEN`), continue: the script in the next step starts LocalStack with `lstk` instead. Mention which path started it in your summary.
+   - **Stop if the LocalStack MCP server is unavailable.** If no LocalStack MCP tools are available in this session, or a LocalStack MCP call fails with an auth token or authentication error, do not deploy or test. Go straight to step 6 and record a `failed` run with the summary "LocalStack MCP server unavailable" and a diagnostic telling the user to run `scripts/save-localstack-token.sh` in the demo repository, then quit and reopen KiroCrew. A run without the MCP server cannot diagnose failures, so it must not look like a normal run.
+   - If only the `start` action fails for another reason, continue: the script in the next step starts LocalStack with `lstk` instead. Mention which path started it in your summary.
 4. Run `"$repo_root/scripts/deploy-and-smoke.sh"`. It uses `lstk` for Terraform and AWS requests, and only starts LocalStack itself if it is still not running.
 5. If the deploy or smoke test fails, diagnose it with the LocalStack MCP tools before recording the result:
    - `localstack-logs-analysis` for errors from the `localstack-ops-processor` Lambda and any `AccessDenied` entries.
