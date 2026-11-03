@@ -43,8 +43,5 @@
     ],
     "storage": true,
     "cron": true
-  },
-  "setup": {
-    "onEnable": "bash setup/check-token.sh"
   }
 }

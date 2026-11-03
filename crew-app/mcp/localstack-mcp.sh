@@ -6,7 +6,7 @@ set -euo pipefail
 # token cannot be referenced from the agent file itself.
 token_file="${KIROCREW_HOME:-$HOME/.kiro/crew}/apps/localstack-ops/data/localstack-auth-token"
 if [[ ! -s "$token_file" ]]; then
-  echo "LocalStack Ops: no LocalStack auth token at $token_file; run scripts/save-localstack-token.sh" >&2
+  echo "LocalStack Ops: no LocalStack auth token at $token_file; save it as described in the demo README" >&2
   exit 1
 fi
 

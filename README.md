@@ -36,13 +36,14 @@ lstk login
 
 Complete the normal browser sign-in. The credentials are stored in your system keychain.
 
-The LocalStack MCP server the app's agent uses needs your LocalStack auth token as well, and it can't read the one `lstk` stored. Copy your token from the [Auth Tokens page](https://app.localstack.cloud/workspace/auth-tokens), then save it for the app:
+The LocalStack MCP server the app's agent uses needs your LocalStack auth token as well, and it can't read the one `lstk` stored. KiroCrew doesn't yet have a way to hand a stored secret to an app's MCP server, so the app reads the token from a file in its data folder. Copy your token from the [Auth Tokens page](https://app.localstack.cloud/workspace/auth-tokens), then save the clipboard to that file, readable only by you:
 
 ```bash
-scripts/save-localstack-token.sh
+mkdir -p ~/.kiro/crew/apps/localstack-ops/data
+(umask 077 && pbpaste > ~/.kiro/crew/apps/localstack-ops/data/localstack-auth-token)
 ```
 
-The script prompts for the token without echoing it or adding it to your shell history, and saves it to `~/.kiro/crew/apps/localstack-ops/data/localstack-auth-token`, readable only by you. LocalStack Ops won't enable until that file exists. That's deliberate: without the token the agent has no LocalStack MCP tools, and a run would quietly skip the investigation the demo is about. The file is outside the repository, but it isn't in KiroCrew's secrets vault, so the agent can read it like any other file in your home directory.
+`pbpaste` is macOS-only; on other systems, paste the token into that file with any editor. The app's MCP server starts through `crew-app/mcp/localstack-mcp.sh`, which reads the file and passes the token to `npx @localstack/localstack-mcp-server`. Without the token, the agent has no LocalStack MCP tools, so it records the run as **Failed** with "LocalStack MCP server unavailable" instead of running without them. The file is outside the repository, but it isn't in KiroCrew's secrets vault, so the agent can read it like any other file in your home directory.
 
 This repository includes the prebuilt LocalStack Ops panel in `crew-app/ui/dist/`, so you don't need to build anything. You do need Node.js (for `npx`), because the LocalStack MCP server runs through it—the LocalStack Power already requires it.
 
@@ -54,7 +55,7 @@ Open KiroCrew Desktop. On a new installation, complete its initial sign-in/setup
 
 Open **Agent Capabilities → MCP Connections** and confirm that a `localstack` connection is present and enabled. If it's missing, enable the LocalStack Power in Kiro and complete the KiroCrew setup flow again before continuing.
 
-This connection is for your own KiroCrew conversations. KiroCrew doesn't share it with app agents, so the LocalStack Ops agent declares its own LocalStack MCP server in `crew-app/agents/localstack-ops-agent.json`. It starts that server through `crew-app/mcp/localstack-mcp.sh`, which supplies the token you saved.
+This connection is for your own KiroCrew conversations. KiroCrew doesn't share it with app agents, so the LocalStack Ops agent declares its own LocalStack MCP server in `crew-app/agents/localstack-ops-agent.json`. It starts that server through `crew-app/mcp/localstack-mcp.sh`, which supplies the token you saved in [Before you start](#before-you-start).
 
 ### 2. Install the LocalStack Ops app from this folder
 
@@ -75,8 +76,6 @@ When this repository changes, refresh the installed copy from the Desktop app: i
 2. Read the app's description and review this repository's `crew-app/` directory if you have not already.
 3. Select **Enable**.
 4. When KiroCrew asks for third-party-app consent, approve **LocalStack Ops** only.
-
-If enabling fails with "LocalStack Ops needs your LocalStack auth token before it can be enabled", run `scripts/save-localstack-token.sh` from this repository and enable the app again.
 
 Enabling registers the app's agent, its `@localstack` access, its backend, its dashboard page, and the scheduled check.
 
@@ -133,8 +132,7 @@ A scheduled run fails quietly: the Schedule view can show a run as in progress, 
 
 - **No `localstack` connection appears in Agent Capabilities:** enable the LocalStack Power/MCP server in Kiro, then repeat the KiroCrew setup flow. Do not enable LocalStack Ops until it appears.
 - **There is no `localstack-ops-check` job:** confirm that LocalStack Ops is enabled in **Apps → Library**. Disabling an app removes its cron jobs.
-- **Enabling fails with `LocalStack Ops needs your LocalStack auth token`:** the app's enable check didn't find a saved token. Run `scripts/save-localstack-token.sh` from this repository, then enable LocalStack Ops again.
-- **A run is recorded as Failed with "LocalStack MCP server unavailable":** the agent started without working LocalStack MCP tools, usually because the saved token is missing or invalid, and stopped instead of running without them. Run `scripts/save-localstack-token.sh` again with a valid token, quit KiroCrew Desktop with **Cmd+Q**, reopen it, and trigger the job. `grep unresolved= ~/.kiro/crew/gateway.log` shows whether KiroCrew could attach the server at all.
+- **A run is recorded as Failed with "LocalStack MCP server unavailable":** the agent started without working LocalStack MCP tools, usually because the saved token is missing or invalid, and stopped instead of running without them. Save a valid token to `~/.kiro/crew/apps/localstack-ops/data/localstack-auth-token` as shown in [Before you start](#before-you-start), quit KiroCrew Desktop with **Cmd+Q**, reopen it, and trigger the job. `grep unresolved= ~/.kiro/crew/gateway.log` shows whether KiroCrew could attach the server at all.
 - **The first run cannot reach LocalStack:** start Docker Desktop, then run `lstk login` in KiroCrew Desktop's Terminal tab and retry the job.
 - **LocalStack Ops is already installed but not visible:** in **Apps → Library**, select **Show _n_ disabled apps**, then open it instead of installing a second copy.
 - **Installing fails with `cannot install while app.json has no readable app identity`:** you selected a folder without an `app.json`, usually the repository root. Install the `crew-app` folder instead.
